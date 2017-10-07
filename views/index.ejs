@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Survey Form</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type ="text/javascript">
+        $(document).ready(function (){
+            // this triggers the connection event in our server!
+            var socket  = io.connect();
+            // we'll write all the socket stuff after the above line!
+            $('#formSubmitted').submit(function (event){
+                event.preventDefault();
+                socket.emit( "posting_form", {
+                    name: $('#name').val(),
+                    location: $('#location').val(),
+                    language: $('#language').val(),
+                    comment: $('#comment').val()
+                });
+            });
+            socket.on('updated_message', function (data){
+                console.log( 'The server says: '  + data.response);
+                mess = document.getElementById('message');
+                mess.innerHTML = `You emitted the following information to the server: ${JSON.stringify(data.response)} Your lucky number emitted by the server is ${data.rand_num}`;
+            });
+        })
+    </script>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        h1 {
+            text-align: center; 
+        }
+        form, #message {
+            border: 2px solid black;
+            display: block;
+            width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input, select, textarea {
+            display: block;
+            margin-bottom: 15px;
+        }
+        div.result {
+            margin: 0 auto;
+        }
+        h4, p {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div id="message"></div>
+    <h1>Fill in the survey!</h1>
+    <form action="/formSubmitted" method="post" id="formSubmitted">
+        <label>Your Name:</label>
+        <input type="text" name="name_key" id="name">
+        <label>Dojo Location:</label>
+        <select name="location_key" id="location">
+            <option value="San Jose">San Jose</option>
+            <option value="Seattle">Seattle</option>
+            <option value="Burbank">Burbank</option>
+            <option value="Tulsa">Tulsa</option>
+        </select>
+        <label>Favorite Language:</label>
+        <select name="language_key" id="language">
+            <option value="JavaScript">JavaScript</option>
+            <option value="Python">Python</option>
+            <option value="Swift">Swift</option>
+            <option value="AngularJS">AngularJS</option>
+        </select>
+        <label>Comment (optional):</label>
+        <textarea name="comment_key" cols="30" rows="10" id="comment"></textarea>
+        <input type="submit" name="submit" value="Submit">
+    </form>
+</body>
+</html>
